@@ -53,7 +53,7 @@ func main() {
 	byteValue, _ := ioutil.ReadAll(file)
 	_ = json.Unmarshal(byteValue, &d)
 
-	var cities []City
+	var locations []City
 
 	for _, f := range d.Features {
 		zip, _ := strconv.Atoi(f.Properties.PostalCode)
@@ -63,25 +63,25 @@ func main() {
 			Longitude: f.Geometry.Coordinates[0],
 			Latitude:  f.Geometry.Coordinates[1],
 		}
-		cities = append(cities, c)
+		locations = append(locations, c)
 	}
-	//log.Println(cities)
-	exportToJSON(cities)
-	exportToPostgres(cities)
+	//log.Println(locations)
+	exportToJSON(locations)
+	exportToPostgres(locations)
 }
 
-func exportToJSON(cities []City) {
+func exportToJSON(locations []City) {
 	export := struct {
-		Cities []City `json:"cities"`
-	}{Cities: cities}
+		Cities []City `json:"locations"`
+	}{Cities: locations}
 	JSONExport, _ := json.Marshal(export)
 	_ = ioutil.WriteFile("export.json", JSONExport, os.ModePerm)
 }
 
-func exportToPostgres(cities []City) {
+func exportToPostgres(locations []City) {
 	query := ""
-	for _, val := range cities {
-		query += fmt.Sprintf("INSERT INTO cities (name,zip,longitude,latitude) ('%s', %d, %v, %v);", val.Name, val.Zip, val.Longitude, val.Latitude)
+	for _, val := range locations {
+		query += fmt.Sprintf("INSERT INTO location (name,zip, coordinates) VALUES ('%s', %d, point(%v, %v) );", val.Name, val.Zip, val.Longitude, val.Latitude)
 	}
 	data := []byte(query)
 	_ = ioutil.WriteFile("export.sql", data, os.ModePerm)
