@@ -78,10 +78,17 @@ func exportToJSON(locations []City) {
 	_ = ioutil.WriteFile("export.json", JSONExport, os.ModePerm)
 }
 
+//postgres schema
+//CREATE TABLE location (
+//id SERIAL PRIMARY KEY ,
+//name VARCHAR(25),
+//zip INT NOT NULL DEFAULT 0,
+//coordinates geometry NOT NULL DEFAULT 'point(0 0)'
+//);
 func exportToPostgres(locations []City) {
 	query := ""
 	for _, val := range locations {
-		query += fmt.Sprintf("INSERT INTO location (name,zip, coordinates) VALUES ('%s', %d, point(%v, %v) );", val.Name, val.Zip, val.Longitude, val.Latitude)
+		query += fmt.Sprintf("INSERT INTO location (name,zip, coordinates) VALUES ('%s', %d, 'point(%v  %v)' );", val.Name, val.Zip, val.Longitude, val.Latitude)
 	}
 	data := []byte(query)
 	_ = ioutil.WriteFile("export.sql", data, os.ModePerm)
